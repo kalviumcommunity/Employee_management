@@ -66,6 +66,12 @@ CREATE TABLE PerformanceReview (
   FOREIGN KEY (ReviewerID) REFERENCES EmployeeProfile(EmployeeID)
 );
 
+-- Create a new test table
+CREATE TABLE TestTable (
+  TestID INT AUTO_INCREMENT PRIMARY KEY,
+  TestName VARCHAR(255)
+);
+
 -- Update EmployeeProfile table to change the data
 -- Example: Change the EmployeeStatus of an employee with EmployeeID = 1
 UPDATE EmployeeProfile
@@ -76,3 +82,6 @@ WHERE EmployeeID = 1;
 -- Example: Add a column 'Salary' to EmployeeProfile
 ALTER TABLE EmployeeProfile
 ADD COLUMN Salary DECIMAL(10, 2);
+
+-- Drop the TestTable (to remove it)
+DROP TABLE IF EXISTS TestTable;
