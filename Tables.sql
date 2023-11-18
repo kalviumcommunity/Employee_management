@@ -1,3 +1,4 @@
+
 -- Create database
 CREATE DATABASE Employee_management;
 
@@ -72,32 +73,57 @@ CREATE TABLE PerformanceReview (
 );
 DESCRIBE PerformanceReview;
 
--- Create a new test table
-CREATE TABLE TestTable (
-  TestID INT AUTO_INCREMENT PRIMARY KEY,
-  TestName VARCHAR(255)
-);
-
 SHOW tables; -- shows all the tables created
-DROP TABLE IF EXISTS TestTable; -- deletes the test table
-SHOW tables; -- shows the updated tables details
 
-
-
--- Update EmployeeProfile table to change the data
--- Example: Change the EmployeeStatus of an employee with EmployeeID = 1
-UPDATE EmployeeProfile
-SET EmployeeStatus = 'Inactive'
-WHERE EmployeeID = 1;
 
 -- Alter EmployeeProfile table to add a new column
 -- Example: Add a column 'Salary' to EmployeeProfile
 ALTER TABLE EmployeeProfile
 ADD COLUMN Salary DECIMAL(10, 2);
+DESCRIBE EmployeeProfile;
 
 -- Insert new employee records into the EmployeeProfile table
-INSERT INTO EmployeeProfile (FirstName, LastName, Email, ContactNumber, DateOfBirth, EmployeeStatus, DepartmentName)
-VALUES ('John', 'Doe', 'johndoe@example.com', '+1234567890', '1990-01-15', 'Active', 'HR');
+INSERT INTO EmployeeProfile (FirstName, LastName, Email, ContactNumber, DateOfBirth, EmployeeStatus, DepartmentName, Salary)
+VALUES ('John', 'Doe', 'johndoe@example.com', '+1234567890', '1990-01-15', 'Active', 'HR'),
+	   ('Pankhuri', 'Srivastava', 'panksri@gmail.com', '+1234567890', '1990-01-15', 'Active', 'HR', 60000),
+       ('Tanishka', 'Dadhich', 'tandad@gmail.com', '+9876543210', '1995-03-20', 'Active', 'IT', 70000),
+       ('Navaneeth', 'Arunkumar', 'navarun@gmail.com', '+1122334455', '1985-07-10', 'Active', 'HR', 55000),
+       ('Dev', 'Pratap', 'devprat@gmail.com', '+9988776655', '1993-05-12', 'Active', 'IT', 75000);
+
+UPDATE EmployeeProfile
+SET Salary = 20000  -- Replace 60000 with the new salary value you want for John
+WHERE FirstName = 'John' AND LastName = 'Doe';
+
+INSERT INTO SkillSet (EmployeeID, SkillName, ProficiencyLevel)
+VALUES (1, 'Java', 'Intermediate'),
+       (1, 'SQL', 'Advanced'),
+       (2, 'Java', 'Advanced'),
+       (2, 'C++', 'Intermediate'),
+       (3, 'SQL', 'Intermediate'),
+       (4, 'Java', 'Intermediate'),
+       (4, 'SQL', 'Advanced');
+
+INSERT INTO Department (DepartmentName, TotalEmployees)
+VALUES ('HR', 2),
+       ('IT', 2);
+
+INSERT INTO JobPosition (DepartmentID, Title, SalaryRange, IsDeptHead)
+VALUES (1, 'HR Manager', '60000-80000', TRUE),
+       (2, 'Software Engineer', '70000-90000', FALSE);
+
+INSERT INTO TaskAssignment (EmployeeID, ManagerID, DueDate, Priority, Status)
+VALUES (1, 2, '2023-11-30', 'High', 'Pending'),
+       (2, 1, '2023-12-15', 'Medium', 'In Progress'),
+       (3, 1, '2023-12-10', 'Low', 'Completed'),
+       (4, 2, '2023-11-20', 'High', 'Pending');
+
+INSERT INTO PerformanceReview (EmployeeID, reviewerID, ReviewDate, Strengths, AreasForImprovement)
+VALUES (1, 2, '2023-10-15', 'Strong problem-solving skills', 'Communication skills need improvement'),
+       (2, 1, '2023-09-20', 'Excellent team player', 'Enhance technical skills'),
+       (3, 1, '2023-11-05', 'Highly organized', 'Improve time management'),
+       (4, 2, '2023-10-25', 'Adapts well to new technologies', 'Improve code documentation');
+
+
 
 -- Update an employee record in the EmployeeProfile table
 UPDATE EmployeeProfile
@@ -108,6 +134,46 @@ WHERE EmployeeID = 1;
 DELETE FROM EmployeeProfile
 WHERE EmployeeID = 2;
 
+describe SkillSet;
+
 -- Select all employees in the HR department
 SELECT * FROM EmployeeProfile WHERE DepartmentName = 'HR';
+
+
+-- List all employees in the "HR" department along with their no. of skills:
+SELECT EP.FirstName, EP.LastName, COUNT(S.ProficiencyLevel) as No_of_skills
+FROM EmployeeProfile EP 
+JOIN SkillSet S ON EP.EmployeeID = S.EmployeeID 
+WHERE EP.DepartmentName = 'HR' 
+GROUP BY EP.FirstName, EP.LastName;
+
+--  Find the highest-paid employee in each department
+SELECT D.DepartmentName, MAX(JP.SalaryRange) AS MaxSalary
+FROM Department D
+LEFT JOIN JobPosition JP ON D.DepartmentID = JP.DepartmentID
+GROUP BY D.DepartmentName;
+
+--  Calculate the average age of employees in the "IT" department
+SELECT AVG(YEAR(NOW()) - YEAR(DateOfBirth)) AS AverageAge
+FROM EmployeeProfile
+WHERE DepartmentName = 'IT';
+
+--  Retrieve all employees who have pending tasks
+SELECT EP.FirstName, EP.LastName, TA.DueDate, TA.Priority
+FROM EmployeeProfile EP
+INNER JOIN TaskAssignment TA ON EP.EmployeeID = TA.EmployeeID
+WHERE TA.Status = 'Pending';
+
+--  Find employees who have both "Java" and "SQL" skills
+SELECT EP.FirstName, EP.LastName
+FROM EmployeeProfile EP
+INNER JOIN SkillSet S ON EP.EmployeeID = S.EmployeeID
+WHERE S.SkillName IN ('Java', 'SQL')
+GROUP BY EP.EmployeeID
+HAVING COUNT(DISTINCT S.SkillName) = 2;
+
+
+
+
+
 
