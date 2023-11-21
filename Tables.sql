@@ -172,8 +172,46 @@ WHERE S.SkillName IN ('Java', 'SQL')
 GROUP BY EP.EmployeeID
 HAVING COUNT(DISTINCT S.SkillName) = 2;
 
+-- Create roles: HR, Employee, and DB_Admin
+CREATE ROLE HR;
+CREATE ROLE Employee;
+CREATE ROLE DB_Admin;
 
+-- Grant read and write access for all tables to the HR role
+GRANT SELECT, INSERT, UPDATE, DELETE ON Employee_management.* TO HR;
 
+-- Grant read and write access to the EmployeeProfile, SkillSet, TaskAssignment, PerformanceReview tables to the Employee role
+GRANT SELECT, INSERT, UPDATE, DELETE ON Employee_management.EmployeeProfile TO Employee;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Employee_management.SkillSet TO Employee;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Employee_management.TaskAssignment TO Employee;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Employee_management.PerformanceReview TO Employee;
 
+-- Grant read access to all tables for the Employee role
+GRANT SELECT ON Employee_management.* TO Employee;
 
+-- Grant all privileges to the DB_Admin role
+GRANT ALL PRIVILEGES ON Employee_management.* TO DB_Admin;
 
+-- Create users
+CREATE USER 'HR_User'@'localhost' IDENTIFIED BY 'hr_password';
+CREATE USER 'Employee_User'@'localhost' IDENTIFIED BY 'employee_password';
+CREATE USER 'DB_Admin_User'@'localhost' IDENTIFIED BY 'db_admin_password';
+
+-- Assign roles to users
+GRANT HR TO 'HR_User'@'localhost';
+GRANT Employee TO 'Employee_User'@'localhost';
+GRANT DB_Admin TO 'DB_Admin_User'@'localhost';
+
+-- Set default roles for users
+SET DEFAULT ROLE HR TO 'HR_User'@'localhost';
+SET DEFAULT ROLE Employee TO 'Employee_User'@'localhost';
+SET DEFAULT ROLE DB_Admin TO 'DB_Admin_User'@'localhost';
+
+-- Create index on EmployeeID column in the EmployeeProfile table
+CREATE INDEX idx_EmployeeID ON Employee_management.EmployeeProfile(EmployeeID);
+
+-- Example query with index usage
+SELECT EP.EmployeeID, EP.FirstName, EP.LastName, S.SkillName, S.ProficiencyLevel
+FROM Employee_management.EmployeeProfile EP
+JOIN Employee_management.SkillSet S ON EP.EmployeeID = S.EmployeeID
+WHERE EP.EmployeeID = 1;
